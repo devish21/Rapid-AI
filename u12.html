@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Rapid AI Personal Assistant</title>
+<style>
+:root{
+  --teal:#0d9488;--teal-soft:#e6fffb;
+  --bg:#f7fcfb;--card:#ffffff;--ink:#073b3a;
+}
+html,body{height:100%;margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+header{position:fixed;top:16px;left:16px;display:flex;gap:10px;align-items:center;justify-content:space-between;width:calc(100% - 32px);z-index:30;background:rgba(255,255,255,0.9);padding:8px 10px;border-radius:10px;box-shadow:0 8px 30px rgba(5,45,42,0.08);border:1px solid rgba(13,148,136,0.12);backdrop-filter:blur(6px);}
+.logo{width:48px;height:48px;display:flex;align-items:center;justify-content:center;}
+.meta h3{margin:0;font-size:15px;color:var(--teal);font-weight:800;letter-spacing:.3px;}
+.meta p{margin:3px 0 0 0;font-size:12px;color:#1f4f4d;}
+.meta p b{color:#000;}
+.theme-switcher{display:flex;align-items:center;gap:10px;}
+.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px 18px 60px;box-sizing:border-box;}
+.card{width:min(920px,96vw);background:var(--card);border-radius:16px;box-shadow:0 18px 50px rgba(3,35,34,0.08);border:1px solid rgba(13,148,136,0.06);overflow:hidden;display:flex;flex-direction:column;}
+.chat{padding:20px;display:flex;flex-direction:column;gap:12px;max-height:58vh;overflow:auto;background:linear-gradient(180deg,#f8fffe,#f3fdfc);}
+.row{display:flex;width:100%;}
+.bubble{max-width:78%;padding:12px 14px;border-radius:12px;line-height:1.45;font-size:15px;box-shadow:0 6px 18px rgba(2,40,38,0.04);word-break:break-word;}
+.user{justify-content:flex-end;}
+.user .bubble{background:linear-gradient(135deg,#16b2a8,var(--teal));color:white;border:1px solid rgba(0,120,110,0.12);}
+.bot{justify-content:flex-start;}
+.bot .bubble{background:#ffffff;color:var(--ink);border:1px solid rgba(13,148,136,0.08);}
+.title{padding:18px 22px 0;text-align:center;font-weight:900;font-size:20px;color:var(--teal);}
+.subtitle{padding:6px 22px 0;text-align:center;font-weight:600;font-size:16px;color:#155e5c;}
+.input-row{padding:16px 22px 6px;display:flex;flex-direction:column;gap:12px;background:var(--card);}
+.composer{display:flex;gap:10px;align-items:center;}
+#prompt{flex:1;padding:14px 14px;border-radius:12px;border:1px solid #cfe9e6;font-size:15px;outline:none;background:#fff;}
+#prompt::placeholder{color:#6e9b96}
+#send,#voiceBtn{padding:12px 16px;border-radius:12px;border:0;background:linear-gradient(135deg,#15c2b5,var(--teal));color:white;font-weight:700;cursor:pointer;box-shadow:0 8px 22px rgba(13,148,136,0.16);}
+.below-line{margin:0 22px 0 22px;padding:12px;text-align:center;font-weight:800;font-size:13px;color:var(--ink);background:var(--teal-soft);border-radius:10px;border:1px solid rgba(13,148,136,0.07);margin-top:6px;margin-bottom:4.5cm;}
+.warn{margin:8px 22px 0 22px;padding:10px 12px;border-radius:10px;background:#fff6f6;color:#8b1d1d;border:1px solid #f6c8c8;}
+.muted{color:#567;font-size:13px;}
+select, label{font-size:13px;}
+@media(max-width:640px){.card{width:98vw;border-radius:12px;}.logo{width:40px;height:40px}}
+</style>
+</head>
+<body>
+
+<header>
+<div style="display:flex;gap:10px;align-items:center;">
+  <div class="logo" aria-hidden="true">
+    <svg viewBox="0 0 64 64" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="G1" x1="0" x2="1"><stop offset="0" stop-color="#7ff3e7"/><stop offset="1" stop-color="#0d9488"/></linearGradient></defs>
+      <circle cx="32" cy="32" r="28" stroke="url(#G1)" stroke-width="2.6" fill="none" opacity="0.95"/>
+      <path d="M10 30a22 22 0 0 0 44 0" stroke="#6eeadc" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.85"/>
+      <path d="M12 38a20 20 0 0 1 40 0" stroke="#bff6f0" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.5"/>
+      <circle cx="32" cy="32" r="12" fill="url(#G1)" opacity="0.98"/>
+      <circle cx="32" cy="18" r="2.2" fill="#fff"/>
+      <circle cx="46" cy="34" r="2.2" fill="#fff"/>
+      <circle cx="22" cy="38" r="2.2" fill="#fff"/>
+    </svg>
+  </div>
+  <div class="meta">
+    <h3>Rapid AI</h3>
+    <p><b>Made by DEVISH SHAH</b></p>
+  </div>
+</div>
+
+<div class="theme-switcher">
+  <label for="colorTheme">Theme:</label>
+  <select id="colorTheme">
+    <option value="standard">Standard</option>
+    <option value="white-beige">White + Beige</option>
+    <option value="white-navy">White + Navy Blue</option>
+    <option value="black-white">Black + White</option>
+  </select>
+  <label for="modeToggle">Mode:</label>
+  <select id="modeToggle">
+    <option value="light">Light</option>
+    <option value="dark">Dark</option>
+  </select>
+</div>
+</header>
+
+<div class="wrap">
+<div class="card" role="application" aria-label="Rapid AI chat">
+<div id="chat" class="chat" aria-live="polite"></div>
+<div class="title">HI, I AM RAPID AI</div>
+<div class="subtitle">ASK ME ANYTHING</div>
+
+<div class="input-row">
+<div class="composer" role="form" aria-label="Send a message to Rapid">
+<input id="prompt" placeholder="Ask Rapid..." aria-label="Ask Rapid input"/>
+<button id="send" aria-label="Send">Send</button>
+<button id="voiceBtn" aria-label="Voice Input">?? Speak</button>
+</div>
+
+<div class="below-line">RAPID AI IS A SYSTEM THAT PROACTIVELY HELPS AND SIMPLIFIES EVERYDAY TASKS FOR A SEAMLESS USER EXPERIENCE.</div>
+<div id="warn" class="warn" style="display:none">API key not set — set API_KEY in the HTML.</div>
+</div>
+</div>
+</div>
+
+<script>
+const API_KEY = "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"; 
+const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODEL = "deepseek/deepseek-chat";
+
+const chat = document.getElementById('chat');
+const prompt = document.getElementById('prompt');
+const sendBtn = document.getElementById('send');
+const voiceBtn = document.getElementById('voiceBtn');
+const warnEl = document.getElementById('warn');
+
+// Theme and Mode Switcher
+const colorThemeSelect = document.getElementById('colorTheme');
+const modeToggleSelect = document.getElementById('modeToggle');
+
+colorThemeSelect.addEventListener('change', applyTheme);
+modeToggleSelect.addEventListener('change', applyTheme);
+
+function applyTheme(){
+  const color = colorThemeSelect.value;
+  const mode = modeToggleSelect.value;
+
+  let bg='#f7fcfb', card='#ffffff', ink='#073b3a', teal='#0d9488', tealSoft='#e6fffb';
+
+  if(color==='white-beige'){ bg='#fffaf0'; card='#fffdf5'; ink='#3b2f2f'; teal='#b08968'; tealSoft='#fff5e6';}
+  else if(color==='white-navy'){ bg='#f0f4ff'; card='#e6edff'; ink='#1b1d3b'; teal='#2b3f91'; tealSoft='#dbe3ff';}
+  else if(color==='black-white'){ bg='#1c1c1c'; card='#2b2b2b'; ink='#eaeaea'; teal='#0d9488'; tealSoft='#073b3a';}
+
+  if(mode==='dark'){
+    bg='#121212';
+    if(color==='standard'){card='#1e1e1e'; ink='#eee'; tealSoft='#073b3a';}
+  }
+
+  document.documentElement.style.setProperty('--bg', bg);
+  document.documentElement.style.setProperty('--card', card);
+  document.documentElement.style.setProperty('--ink', ink);
+  document.documentElement.style.setProperty('--teal', teal);
+  document.documentElement.style.setProperty('--teal-soft', tealSoft);
+}
+
+// Chat functions (same as before)
+function appendBubble(who, html){
+  const row=document.createElement('div'); row.className=who;
+  const bubble=document.createElement('div'); bubble.className='bubble'; bubble.innerHTML=html;
+  row.appendChild(bubble); chat.appendChild(row); chat.scrollTop=chat.scrollHeight;
+}
+
+const MATH_ALLOWED=/^[0-9+\-*/().\s^%]+$/;
+function safeEvalMath(input){
+  if(!MATH_ALLOWED.test(input)) return null;
+  try{ const withPerc=input.replace(/(\d+(\.\d+)?)%/g,'($1/100)'); const expr=withPerc.replace(/\^/g,'**'); const val=Function('"use strict";return ('+expr+')')(); if(typeof val==='number' && isFinite(val)) return val; return null;}catch(e){return null;}
+}
+
+const history=[{role:'system',content:'You are Rapid AI. Provide concise answers. Show math steps if needed.'}];
+
+function speakText(text){ if('speechSynthesis' in window){const utter=new SpeechSynthesisUtterance(text);utter.lang='en-US';utter.rate=1;utter.pitch=1; speechSynthesis.speak(utter);} }
+
+async function sendMessage(text){
+  if(!text) return; appendBubble('user', text); prompt.value='';
+  const calc=safeEvalMath(text);
+  if(calc!==null){ const answerText=`Answer: ${calc}`; appendBubble('bot', answerText); speakText(answerText); history.push({role:'user',content:text}); history.push({role:'assistant',content:String(calc)}); return;}
+  if(!API_KEY || API_KEY.trim()===''){ const msg='No API key set — local math only.'; appendBubble('bot', msg); speakText(msg); return;}
+  appendBubble('bot','Thinking…');
+  try{
+    const resp=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},body:JSON.stringify({model:MODEL,messages:[...history,{role:'user',content:text}],temperature:0.2,max_tokens:800})});
+    if(!resp.ok){ const txt=await resp.text(); const errMsg=`API error ${resp.status}: ${txt}`; chat.lastElementChild.querySelector('.bubble').innerText=errMsg; speakText(errMsg); return; }
+    const data=await resp.json();
+    const reply=data?.choices?.[0]?.message?.content??data?.output_text??JSON.stringify(data,null,2);
+    const safeReply=reply.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    chat.lastElementChild.querySelector('.bubble').innerHTML=safeReply; speakText(reply);
+    history.push({role:'user',content:text}); history.push({role:'assistant',content:reply});
+  }catch(err){const netErr='Network error: '+err.message; chat.lastElementChild.querySelector('.bubble').innerText=netErr; speakText(netErr);}
+}
+
+sendBtn.addEventListener('click',()=>sendMessage(prompt.value));
+prompt.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage(prompt.value);});
+
+// Voice Input
+let recognition;
+if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SpeechRecognition(); recognition.lang='en-US'; recognition.interimResults=false; recognition.maxAlternatives=1;
+  voiceBtn.addEventListener('click',()=>recognition.start());
+  recognition.onresult=(event)=>{ const speech=event.results[0][0].transcript; sendMessage(speech); }
+  recognition.onerror=(e)=>{ console.error('Voice error:',e); }
+}else{ voiceBtn.disabled=true; voiceBtn.textContent='?? Not supported'; }
+
+window.addEventListener('load',()=>{prompt.focus();});
+</script>
+</body>
+</html>
