@@ -1,2 +1,1 @@
-# Rapid-AI
- A PERONAL ASSISTANT
+
